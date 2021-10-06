@@ -1,0 +1,4 @@
+rootProject.name = 'functionals'
+include 'dictionary-generator'
+include 'cadastral-assistant'
+
