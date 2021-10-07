@@ -1,6 +1,9 @@
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
@@ -24,44 +27,78 @@ public class Main {
             try {
                 String input = scanner.nextLine();
                 if ("/exit".equals(input)) break;
+
                 if ("/log".equals(input)) {
                     showDictionary();
+
                 } else if (input.startsWith("/txt ")) {
-                    addFileToDictionary(input);
+                    dictionary = addFileToDictionary(extractPath(input));
+
                 } else if (input.startsWith("/save ")) {
-                    saveDictionaryToFile(input);
+                    saveDictionaryToFile(extractPath(input));
+
                 } else {
                     dictionary = addToDictionary(input);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println("Ошибка команды:" + e.getMessage());
             }
         }
         System.out.println("До свидания!");
     }
 
     private static String[] addToDictionary(String input) {
+
+        String[] r =
+                Arrays.stream(input
+                        .replaceAll("\\p{Punct}", "")
+                        .split(" "))
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .sorted()
+                .map(String::toLowerCase)
+                .toArray(String[]::new);
+
+        System.out.println("New deal: " + Arrays.toString(r));
+
+
         String[] portion = input.split(" ");
-//        Arrays.stream(portion).filter(String::isBlank).;
         String[] newDic = new String[dictionary.length + portion.length];
-        // TODO: удалить всю пунктуацию (возможно ещё до разрезания) // в данной версии игнорируется из-за сроков
         System.arraycopy(dictionary, 0, newDic, 0, dictionary.length);
         System.arraycopy(portion, 0, newDic, dictionary.length, portion.length);
         Arrays.sort(newDic);
+
+
         return newDic;
+
+//        return Stream.concat(
+//                        Arrays.stream(dictionary),
+//                        Arrays.stream(input.chars()
+//                                .filter(codePoint ->
+//                                        Character.isSpaceChar(codePoint) || Character.isLetter(codePoint))
+//                                .toString()
+//                                .split(" ")
+//                        ).filter(String::isBlank)
+//                ).sorted()
+//                .toArray(String[]::new);
     }
 
-    private static void saveDictionaryToFile(String saveCommand) {
-        String path;
-        try {
-            path = extractPath(saveCommand);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return;
+    private static void saveDictionaryToFile(String savePath) {
+
+        try(FileWriter saver = new FileWriter(savePath, false)) {
+            Arrays.stream(dictionary).forEach(x -> {
+                try {
+                    saver.write(x);
+                    saver.append(" ");
+                } catch (IOException e) {
+                    System.out.println("Ошибка записи: " + e.getMessage());
+                }
+            });
+            saver.flush();
+        } catch (IOException e) {
+            System.out.println("Ошибка сохранения:" + e.getMessage());
         }
-        /*
-            Записать строки словаря в файл
-         */
+        System.out.println("Словарь сохранён в файл " + savePath);
     }
 
     private static String extractPath(String input) throws IllegalArgumentException {
@@ -72,20 +109,15 @@ public class Main {
         return members[1];
     }
 
-    private static void addFileToDictionary(String addCommand) {
-        String path;
-        try {
-            path = extractPath(addCommand);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return;
-        }        /*
-            Открыть поток из файла и сделать из него строку.
-            Строку запустить на основной процесс: раскрошить, добавить, упорядочить.
-         */
+    private static String[] addFileToDictionary(String sourcePath) throws IOException {
+        return addToDictionary(new String(Files.readAllBytes(Paths.get(sourcePath))));
     }
 
     private static void showDictionary() {
-        Arrays.stream(dictionary).forEach(System.out::println);
+        if (dictionary.length == 0) {
+            System.out.println("Словарь пуст.");
+        } else {
+            Arrays.stream(dictionary).forEach(System.out::println);
+        }
     }
 }
