@@ -25,6 +25,7 @@ public class MainStream {
      * Статический массив словаря.
      */
     private static String[] dictionary = new String[0];
+    // накопление результатов работы в массиве строк
 
     public static void main(String[] args) {
         System.out.println(WELCOME);
@@ -60,7 +61,6 @@ public class MainStream {
      * @return              новую отсортированную версию словаря с добавлением слов, полученных из входной строки.
      */
     private static String[] addToDictionary(String input, String[] oldDictionary) {
-
         return Stream
                 .concat(
                         Arrays.stream(oldDictionary),
@@ -70,13 +70,13 @@ public class MainStream {
                                 )
                                 .filter(s -> !s.isBlank())
                                 .map(String::toLowerCase)
-                                .distinct()
                 )
                 .distinct()
                 .sorted()
                 .toArray(String[]::new);
 
     }
+    // тело функции представляет собой монаду, функция детерминирована и чиста.
 
     /**
      * Создаёт (по крайней мере пытается) файл, содержащий строку из всех слов переданного словаря.
@@ -100,6 +100,9 @@ public class MainStream {
         }
         System.out.println("Словарь сохранён в файл " + savePath);
     }
+    // Функция детерминирована: одинаковый ввод в норме вызывает одинаковый результат,
+    // но опосредованно средствами ОС. Побочный эффект заключается в операции вывода на диск
+    // и на экран, а также в обработке исключений.
 
     /**
      * Получает адрес файла из текста команды.
@@ -114,6 +117,8 @@ public class MainStream {
         }
         return members[1];
     }
+    // Функция детерминирована: одинаковый ввод в норме даёт одинаковый результат.
+    // Побочный эффект заключается в обработке исключения.
 
 
     /**
@@ -126,6 +131,7 @@ public class MainStream {
     private static String[] addFileToDictionary(String sourcePath, String[] oldDictionary) throws IOException {
         return addToDictionary(new String(Files.readAllBytes(Paths.get(sourcePath))), oldDictionary);
     }
+    // Функция детерминирована, побочный эффект заключается во вводе с диска и выбросе исключения.
 
     /**
      * Выводит на экран все слова из массива каждое с новой строки
@@ -139,5 +145,6 @@ public class MainStream {
             Arrays.stream(dictionary).forEach(System.out::println);
         }
     }
+    // Функция детерминирована. Побочный эффект заключается в выводе на экран.
 
 }

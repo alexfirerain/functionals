@@ -41,7 +41,7 @@ public class MainFunctionalist {
                     dictionary = fileAdder.apply(pathExtractor.apply(input), dictionary);
 
                 } else if (input.startsWith("/save ")) {
-                    fileSaver.accept(pathExtractor.apply(input));
+                    fileSaver.accept(pathExtractor.apply(input), dictionary);
 
                 } else {
                     dictionary = inputAdder.apply(input, dictionary);
@@ -79,10 +79,11 @@ public class MainFunctionalist {
             .distinct()
             .sorted()
             .toArray(String[]::new);
+    // тело функции представляет собой монаду, функция детерминирована и чиста.
 
     /**
      * Добавлятель слов из новой строки ввода к существующему словарю.
-     * inputAdder.apply(input, oldDic) эквивалентно uniter.apply(dictionarize.apply(input), oldDic)
+     * {@code inputAdder.apply(input, oldDic)} эквивалентно {@code uniter.apply(dictionarize.apply(input), oldDic)}
      */
     private static final BiFunction<String, String[], String[]> inputAdder = (input, oldDic) -> Stream
             .concat(
@@ -97,13 +98,14 @@ public class MainFunctionalist {
             .distinct()
             .sorted()
             .toArray(String[]::new);
+    // тело функции представляет собой монаду, функция детерминирована и чиста.
 
     /**
-     * Сохранятель статического массива Словаря в файл по переданному адресу.
+     * Сохранятель массива в файл по переданному адресу.
      */
-    private static final Consumer<String> fileSaver = path -> {
+    private static final BiConsumer<String, String[]> fileSaver = (path, dic) -> {
         try(FileWriter saver = new FileWriter(path, false)) {
-            Arrays.stream(dictionary).forEach(x -> {
+            Arrays.stream(dic).forEach(x -> {
                 try {
                     saver.write(x);
                     saver.append(" ");
