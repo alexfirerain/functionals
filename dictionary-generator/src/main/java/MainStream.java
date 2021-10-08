@@ -95,25 +95,24 @@ public class MainStream {
                 }
             });
             saver.flush();
+            System.out.println("Словарь сохранён в файл " + savePath);
         } catch (IOException e) {
             System.out.println("Ошибка сохранения:" + e.getMessage());
         }
-        System.out.println("Словарь сохранён в файл " + savePath);
     }
     // Функция детерминирована: одинаковый ввод в норме вызывает одинаковый результат,
     // но опосредованно средствами ОС. Побочный эффект заключается в операции вывода на диск
     // и на экран, а также в обработке исключений.
 
     /**
-     * Получает адрес файла из текста команды.
+     * Извлекает адрес файла из текста команды (второе поле). Если он не распознан, то возвращает пустую строку.
      * @param input строка ввода.
-     * @return      адрес файла из текста строки.
-     * @throws IllegalArgumentException если в строке не распознано поле адреса.
+     * @return      адрес файла из текста строки или пустую строку.
      */
-    private static String extractPath(String input) throws IllegalArgumentException {
+    private static String extractPath(String input)  {
         String[] members = input.split(" ");
         if (members.length != 2) {
-            throw new IllegalArgumentException("Путь не распознан!");
+            return "";
         }
         return members[1];
     }
